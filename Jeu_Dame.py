@@ -2,9 +2,9 @@ import pygame
 
 
 pygame.init()
-hauteur = ""
-largeur = ""
-pion = ""
+WIDTH, HEIGHT = 800, 800
+ROWS, COLS = 8, 8
+SQUARE_SIZE = WIDTH // COLS
 
 hauteur = 0
 largeur = 0
@@ -66,8 +66,8 @@ def bouge_en_haut():
 
 screen = pygame.display.set_mode((1000, 1000))
 
-icon = pygame.image.load("C:\\Users\\pd51emw\\Downloads\\International_draughts.png")
-pion = pygame.image.load("C:\\Users\\pd51emw\\Downloads\\MA-24_pion.png")
+icon = pygame.image.load("C:\\Users\\pc38pck\\Downloads\\International_draughts.png")
+pion = pygame.image.load("C:\\Users\\pc38pck\\Downloads\\MA-24_pion.png")
 
 pygame.display.set_icon(icon)
 
@@ -208,3 +208,4 @@ while running:
         elif btn_presse[pygame.K_q]:
             running = False
         pygame.display.update()
+
