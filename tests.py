@@ -3,144 +3,130 @@ import pygame
 pygame.init()
 
 LARGEUR, HAUTEUR = 800, 800
-ROWS, COLS = 8, 8
-SQUARE_SIZE = LARGEUR // COLS
+LIGNES, COLS = 8, 8
+TAILLE_CARREE = LARGEUR // COLS
 
-BROWN = (190, 130, 80)
-WHITE = (250, 247, 225)
+BRUN = (190, 130, 80)
+BLANC = (250, 247, 225)
 
-screen = pygame.display.set_mode((LARGEUR, HAUTEUR))
-pygame.display.set_caption("MA-24 : Dames Game")
+ecran = pygame.display.set_mode((LARGEUR, HAUTEUR))
+pygame.display.set_caption("MA-24 : Jeu de Dames")
 
-icon = pygame.image.load("C:\\Users\\pc38pck\\Downloads\\International_draughts.png")
-black_piece_image = pygame.image.load("C:\\Users\\pc38pck\\Downloads\\MA-24_pion-noir.png")
-white_piece_image = pygame.image.load("C:\\Users\\pc38pck\\Downloads\\MA-24_pion-blanc.png")
-pygame.display.set_icon(icon)
+icone = pygame.image.load("C:\\Users\\pc38pck\\Downloads\\International_draughts.png")
+pion_noir = pygame.image.load("C:\\Users\\pc38pck\\Downloads\\MA-24_pion-noir.png")
+pion_blanc = pygame.image.load("C:\\Users\\pc38pck\\Downloads\\MA-24_pion-blanc.png")
+pygame.display.set_icon(icone)
 
-black_piece_image = pygame.transform.scale(black_piece_image, (SQUARE_SIZE, SQUARE_SIZE))
-white_piece_image = pygame.transform.scale(white_piece_image, (SQUARE_SIZE, SQUARE_SIZE))
+image_pion_noir = pygame.transform.scale(pion_noir, (TAILLE_CARREE, TAILLE_CARREE))
+image_pion_blanc = pygame.transform.scale(pion_blanc, (TAILLE_CARREE, TAILLE_CARREE))
 
 
 def dessiner_tableau():
-    for row in range(ROWS):
+    for ligne in range(LIGNES):
         for col in range(COLS):
-            color = BROWN if (row + col) % 2 == 0 else WHITE
-            pygame.draw.rect(screen, color, (col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
+            couleur = BRUN if (ligne + col) % 2 == 0 else BLANC
+            pygame.draw.rect(ecran, couleur, (col * TAILLE_CARREE, ligne * TAILLE_CARREE, TAILLE_CARREE, TAILLE_CARREE))
 
 
-def create_pieces():
-    board = [[None for _ in range(COLS)] for _ in range(ROWS)]
-    for row in range(ROWS):
+def creer_pions():
+    plateau = [[None for _ in range(COLS)] for _ in range(LIGNES)]
+    for ligne in range(LIGNES):
         for col in range(COLS):
-            if (row + col) % 2 != 0:  # Only place on dark squares
-                if row < 2:
-                    board[row][col] = "B"  # Black piece (top two rows)
-                elif row > 5:
-                    board[row][col] = "W"  # White piece (bottom two rows)
-    return board
+            if (ligne + col) % 2 != 0:
+                if ligne < 2:
+                    plateau[ligne][col] = "N"
+                elif ligne > 5:
+                    plateau[ligne][col] = "B"
+    return plateau
 
 
-def draw_pieces(board):
-    for row in range(ROWS):
+def dessiner_pions(plateau):
+    for ligne in range(LIGNES):
         for col in range(COLS):
-            if board[row][col] == "B":
-                screen.blit(black_piece_image, (col * SQUARE_SIZE, row * SQUARE_SIZE))
-            elif board[row][col] == "W":
-                screen.blit(white_piece_image, (col * SQUARE_SIZE, row * SQUARE_SIZE))
+            if plateau[ligne][col] == "N":
+                ecran.blit(image_pion_noir, (col * TAILLE_CARREE, ligne * TAILLE_CARREE))
+            elif plateau[ligne][col] == "B":
+                ecran.blit(image_pion_blanc, (col * TAILLE_CARREE, ligne * TAILLE_CARREE))
 
 
-def valid_move(board, old_row, old_col, new_row, new_col):
-    """Check if a move is valid."""
-    if board[new_row][new_col] is not None:
+def deplacement_valide(plateau, ancienne_ligne, ancienne_col, nouvelle_ligne, nouvelle_col, joueur):
+    if plateau[nouvelle_ligne][nouvelle_col] is not None:
         return False
-
-    row_diff = new_row - old_row
-    col_diff = abs(new_col - old_col)
-
-    if col_diff != 1:
+    diff_ligne = nouvelle_ligne - ancienne_ligne
+    diff_col = abs(nouvelle_col - ancienne_col)
+    if diff_col != 1:
         return False
-
-    if board[old_row][old_col] == "B" and row_diff != 1:
+    if joueur == "N" and diff_ligne != 1:
         return False
-
-    if board[old_row][old_col] == "W" and row_diff != -1:
+    if joueur == "B" and diff_ligne != -1:
         return False
-
     return True
 
 
-def valid_capture(board, old_row, old_col, new_row, new_col):
-    row_diff = new_row - old_row
-    col_diff = abs(new_col - old_col)
-
-    if col_diff != 2:
+def capture_valide(plateau, ancienne_ligne, ancienne_col, nouvelle_ligne, nouvelle_col, joueur):
+    diff_ligne = nouvelle_ligne - ancienne_ligne
+    diff_col = abs(nouvelle_col - ancienne_col)
+    if diff_col != 2:
         return False
-
-    if row_diff not in [2, -2]:
+    if diff_ligne not in [2, -2]:
         return False
-
-    middle_row = (old_row + new_row) // 2
-    middle_col = (old_col + new_col) // 2
-
-    if board[middle_row][middle_col] is None:
+    ligne_milieu = (ancienne_ligne + nouvelle_ligne) // 2
+    col_milieu = (ancienne_col + nouvelle_col) // 2
+    if plateau[ligne_milieu][col_milieu] is None:
         return False
-
-    if board[old_row][old_col] == "B" and board[middle_row][middle_col] != "W":
+    if joueur == "N" and plateau[ligne_milieu][col_milieu] != "B":
         return False
-    if board[old_row][old_col] == "W" and board[middle_row][middle_col] != "B":
+    if joueur == "B" and plateau[ligne_milieu][col_milieu] != "N":
         return False
-
     return True
 
 
-def perform_capture(board, old_row, old_col, new_row, new_col):
-    middle_row = (old_row + new_row) // 2
-    middle_col = (old_col + new_col) // 2
-
-    board[middle_row][middle_col] = None
-
-    board[new_row][new_col] = board[old_row][old_col]
-    board[old_row][old_col] = None
+def capturer(plateau, ancienne_ligne, ancienne_col, nouvelle_ligne, nouvelle_col):
+    ligne_milieu = (ancienne_ligne + nouvelle_ligne) // 2
+    col_milieu = (ancienne_col + nouvelle_col) // 2
+    plateau[ligne_milieu][col_milieu] = None
+    plateau[nouvelle_ligne][nouvelle_col] = plateau[ancienne_ligne][ancienne_col]
+    plateau[ancienne_ligne][ancienne_col] = None
 
 
-def changer_position(board, old_row, old_col, new_row, new_col):
-    if valid_move(board, old_row, old_col, new_row, new_col):
-        board[new_row][new_col] = board[old_row][old_col]
-        board[old_row][old_col] = None
+def changer_position(plateau, ancienne_ligne, ancienne_col, nouvelle_ligne, nouvelle_col, joueur):
+    if deplacement_valide(plateau, ancienne_ligne, ancienne_col, nouvelle_ligne, nouvelle_col, joueur):
+        plateau[nouvelle_ligne][nouvelle_col] = plateau[ancienne_ligne][ancienne_col]
+        plateau[ancienne_ligne][ancienne_col] = None
         return True
-    elif valid_capture(board, old_row, old_col, new_row, new_col):
-        perform_capture(board, old_row, old_col, new_row, new_col)
+    elif capture_valide(plateau, ancienne_ligne, ancienne_col, nouvelle_ligne, nouvelle_col, joueur):
+        capturer(plateau, ancienne_ligne, ancienne_col, nouvelle_ligne, nouvelle_col)
         return True
     return False
 
 
-board = create_pieces()
-selected_piece = None
-running = True
+plateau = creer_pions()
+pion_selectionne = None
+tour_courant = "B"
+en_cours = True
 
-while running:
+while en_cours:
     dessiner_tableau()
-    draw_pieces(board)
+    dessiner_pions(plateau)
     pygame.display.flip()
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            running = False
-
+            en_cours = False
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            mouse_x, mouse_y = event.pos
-            clicked_row = mouse_y // SQUARE_SIZE
-            clicked_col = mouse_x // SQUARE_SIZE
+            souris_x, souris_y = event.pos
+            ligne_cliquee = souris_y // TAILLE_CARREE
+            col_cliquee = souris_x // TAILLE_CARREE
 
-            if selected_piece:
-                old_row, old_col = selected_piece
-                if changer_position(board, old_row, old_col, clicked_row, clicked_col):
-                    selected_piece = None
-            elif board[clicked_row][clicked_col] is not None:
-                selected_piece = (clicked_row, clicked_col)
-
+            if pion_selectionne:
+                ancienne_ligne, ancienne_col = pion_selectionne
+                if changer_position(plateau, ancienne_ligne, ancienne_col, ligne_cliquee, col_cliquee, tour_courant):
+                    pion_selectionne = None
+                    tour_courant = "N" if tour_courant == "B" else "B"
+            elif plateau[ligne_cliquee][col_cliquee] == tour_courant:
+                pion_selectionne = (ligne_cliquee, col_cliquee)
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_q:
-                running = False
+                en_cours = False
 
 pygame.quit()
