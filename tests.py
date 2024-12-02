@@ -22,7 +22,6 @@ white_piece_image = pygame.transform.scale(white_piece_image, (SQUARE_SIZE, SQUA
 
 
 def dessiner_tableau():
-    """Draw the checkerboard."""
     for row in range(ROWS):
         for col in range(COLS):
             color = BROWN if (row + col) % 2 == 0 else WHITE
