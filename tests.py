@@ -2,27 +2,23 @@ import pygame
 
 pygame.init()
 
-# Screen settings
-LARGEUR, HAUTEUR = 800, 850  # Extra height for turn bar
+LARGEUR, HAUTEUR = 800, 850
 LIGNES, COLS = 8, 8
 TAILLE_CARREE = LARGEUR // COLS
 BAR_HAUTEUR = 50
 
-# Colors
 BRUN = (190, 130, 80)
 BLANC = (250, 247, 225)
 NOIR = (0, 0, 0)
 BLANC_CASSE = (255, 255, 255)
+ROUGE = (255, 0, 0)
 
-# Font setup
 font = pygame.font.Font(None, 40)
 game_over_font = pygame.font.Font(None, 80)
 
-# Initialize screen
 ecran = pygame.display.set_mode((LARGEUR, HAUTEUR))
 pygame.display.set_caption("MA-24 : Jeu de Dames")
 
-# Load images
 icone = pygame.image.load("C:\\Users\\pc38pck\\Downloads\\International_draughts.png")
 pion_noir = pygame.image.load("C:\\Users\\pc38pck\\Downloads\\MA-24_pion-noir.png")
 pion_blanc = pygame.image.load("C:\\Users\\pc38pck\\Downloads\\MA-24_pion-blanc.png")
@@ -82,7 +78,7 @@ def compter_pions(plateau):
 
 def afficher_gagnant(gagnant):
     ecran.fill(BLANC_CASSE)
-    texte = f"{gagnant}s ont gagné!"
+    texte = f"{gagnant}s ont gagnés!"
     label = game_over_font.render(texte, True, NOIR)
     ecran.blit(label, (LARGEUR // 2 - label.get_width() // 2, HAUTEUR // 2 - label.get_height() // 2))
     pygame.display.flip()
@@ -144,11 +140,19 @@ pion_selectionne = None
 tour_courant = "B"
 en_cours = True
 
+
+
 while en_cours:
     ecran.fill(BLANC_CASSE)
     afficher_tour(tour_courant)
     dessiner_tableau()
     dessiner_pions(plateau)
+
+    if pion_selectionne:
+        ancienne_ligne, ancienne_col = pion_selectionne
+        pygame.draw.rect(ecran, ROUGE, (
+        ancienne_col * TAILLE_CARREE, ancienne_ligne * TAILLE_CARREE + BAR_HAUTEUR, TAILLE_CARREE, TAILLE_CARREE), 5)
+
     pygame.display.flip()
 
     noirs, blancs = compter_pions(plateau)
@@ -162,20 +166,20 @@ while en_cours:
             en_cours = False
         elif event.type == pygame.MOUSEBUTTONDOWN:
             souris_x, souris_y = event.pos
-            if souris_y > BAR_HAUTEUR:  # Prevents clicking the turn bar
+            if souris_y > BAR_HAUTEUR:
                 ligne_cliquee = (souris_y - BAR_HAUTEUR) // TAILLE_CARREE
                 col_cliquee = souris_x // TAILLE_CARREE
 
                 if pion_selectionne:
                     ancienne_ligne, ancienne_col = pion_selectionne
                     if (ligne_cliquee, col_cliquee) == pion_selectionne:
-                        pion_selectionne = None  # Deselect the piece if clicked again
+                        pion_selectionne = None
                     elif changer_position(plateau, ancienne_ligne, ancienne_col, ligne_cliquee, col_cliquee,
                                           tour_courant):
                         tour_courant = "N" if tour_courant == "B" else "B"
-                        pion_selectionne = None  # Deselect after move
+                        pion_selectionne = None
                     else:
-                        pion_selectionne = None  # Invalid move, deselect
+                        pion_selectionne = None
                 elif plateau[ligne_cliquee][col_cliquee] == tour_courant:
                     pion_selectionne = (ligne_cliquee, col_cliquee)
 

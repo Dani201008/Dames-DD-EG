@@ -1,6 +1,14 @@
-import pygame
-import tests_gfx as tests
+from tests_gfx import *
 
+def compter_pions(plateau):
+    noirs, blancs = 0, 0
+    for ligne in plateau:
+        for case in ligne:
+            if case == "N":
+                noirs += 1
+            elif case == "B":
+                blancs += 1
+    return noirs, blancs
 
 def deplacement_valide(plateau, ancienne_ligne, ancienne_col, nouvelle_ligne, nouvelle_col, joueur):
     if plateau[nouvelle_ligne][nouvelle_col] is not None:
@@ -53,24 +61,52 @@ def changer_position(plateau, ancienne_ligne, ancienne_col, nouvelle_ligne, nouv
     return False
 
 
+plateau = creer_pions()
+pion_selectionne = None
+tour_courant = "B"
+en_cours = True
 
-for event in pygame.event.get():
-    if event.type == pygame.QUIT:
-        en_cours = False
-    elif event.type == pygame.MOUSEBUTTONDOWN:
-        souris_x, souris_y = event.pos
-        ligne_cliquee = souris_y // tests.TAILLE_CARREE
-        col_cliquee = souris_x // tests.TAILLE_CARREE
+def play():
+    while en_cours:
+        ecran.fill(BLANC_CASSE)
+        afficher_tour(tour_courant)
+        dessiner_tableau()
+        dessiner_pions(plateau)
 
-        if tests.pion_selectionne:
-            ancienne_ligne, ancienne_col = tests.pion_selectionne
-            if changer_position(tests.plateau, ancienne_ligne, ancienne_col, ligne_cliquee, col_cliquee, tests.tour_courant):
-                pion_selectionne = None
-                tour_courant = "N" if tour_courant == "B" else "B"
-        elif tests.plateau[ligne_cliquee][col_cliquee] == tour_courant:
-            pion_selectionne = (ligne_cliquee, col_cliquee)
-    elif event.type == pygame.KEYDOWN:
-        if event.key == pygame.K_q:
-            en_cours = False
+        if pion_selectionne:
+            ancienne_ligne, ancienne_col = pion_selectionne
+            # Highlight the selected piece by drawing a red outline around it
+            pygame.draw.rect(ecran, ROUGE, (
+            ancienne_col * TAILLE_CARREE, ancienne_ligne * TAILLE_CARREE + BAR_HAUTEUR, TAILLE_CARREE, TAILLE_CARREE), 5)
+
+        pygame.display.flip()
+
+        noirs, blancs = compter_pions(plateau)
+        if noirs == 0 or blancs == 0:
+            afficher_gagnant("Blanc" if noirs == 0 else "Noir")
+            pygame.time.delay(3000)
+            break
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                en_cours = False
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                souris_x, souris_y = event.pos
+                if souris_y > BAR_HAUTEUR:  # Prevents clicking the turn bar
+                    ligne_cliquee = (souris_y - BAR_HAUTEUR) // TAILLE_CARREE
+                    col_cliquee = souris_x // TAILLE_CARREE
+
+                    if pion_selectionne:
+                        ancienne_ligne, ancienne_col = pion_selectionne
+                        if (ligne_cliquee, col_cliquee) == pion_selectionne:
+                            pion_selectionne = None  # Deselect the piece if clicked again
+                        elif changer_position(plateau, ancienne_ligne, ancienne_col, ligne_cliquee, col_cliquee,
+                                              tour_courant):
+                            tour_courant = "N" if tour_courant == "B" else "B"
+                            pion_selectionne = None  # Deselect after move
+                        else:
+                            pion_selectionne = None  # Invalid move, deselect
+                    elif plateau[ligne_cliquee][col_cliquee] == tour_courant:
+                        pion_selectionne = (ligne_cliquee, col_cliquee)
 
 pygame.quit()
