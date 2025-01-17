@@ -1,4 +1,4 @@
-from tests_gfx import *
+from front_end import *
 
 def compter_pions(plateau):
     noirs, blancs = 0, 0
@@ -66,47 +66,47 @@ pion_selectionne = None
 tour_courant = "B"
 en_cours = True
 
-def play():
-    while en_cours:
-        ecran.fill(BLANC_CASSE)
-        afficher_tour(tour_courant)
-        dessiner_tableau()
-        dessiner_pions(plateau)
 
-        if pion_selectionne:
-            ancienne_ligne, ancienne_col = pion_selectionne
-            # Highlight the selected piece by drawing a red outline around it
-            pygame.draw.rect(ecran, ROUGE, (
-            ancienne_col * TAILLE_CARREE, ancienne_ligne * TAILLE_CARREE + BAR_HAUTEUR, TAILLE_CARREE, TAILLE_CARREE), 5)
+while en_cours:
+    ecran.fill(BLANC_CASSE)
+    afficher_tour(tour_courant)
+    dessiner_tableau()
+    dessiner_pions(plateau)
 
-        pygame.display.flip()
+    if pion_selectionne:
+        ancienne_ligne, ancienne_col = pion_selectionne
+        # Highlight the selected piece by drawing a red outline around it
+        pygame.draw.rect(ecran, ROUGE, (
+        ancienne_col * TAILLE_CARREE, ancienne_ligne * TAILLE_CARREE + BAR_HAUTEUR, TAILLE_CARREE, TAILLE_CARREE), 5)
 
-        noirs, blancs = compter_pions(plateau)
-        if noirs == 0 or blancs == 0:
-            afficher_gagnant("Blanc" if noirs == 0 else "Noir")
-            pygame.time.delay(3000)
-            break
+    pygame.display.flip()
 
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                en_cours = False
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                souris_x, souris_y = event.pos
-                if souris_y > BAR_HAUTEUR:  # Prevents clicking the turn bar
-                    ligne_cliquee = (souris_y - BAR_HAUTEUR) // TAILLE_CARREE
-                    col_cliquee = souris_x // TAILLE_CARREE
+    noirs, blancs = compter_pions(plateau)
+    if noirs == 0 or blancs == 0:
+        afficher_gagnant("Blanc" if noirs == 0 else "Noir")
+        pygame.time.delay(3000)
+        break
 
-                    if pion_selectionne:
-                        ancienne_ligne, ancienne_col = pion_selectionne
-                        if (ligne_cliquee, col_cliquee) == pion_selectionne:
-                            pion_selectionne = None  # Deselect the piece if clicked again
-                        elif changer_position(plateau, ancienne_ligne, ancienne_col, ligne_cliquee, col_cliquee,
-                                              tour_courant):
-                            tour_courant = "N" if tour_courant == "B" else "B"
-                            pion_selectionne = None  # Deselect after move
-                        else:
-                            pion_selectionne = None  # Invalid move, deselect
-                    elif plateau[ligne_cliquee][col_cliquee] == tour_courant:
-                        pion_selectionne = (ligne_cliquee, col_cliquee)
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            en_cours = False
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            souris_x, souris_y = event.pos
+            if souris_y > BAR_HAUTEUR:  # Prevents clicking the turn bar
+                ligne_cliquee = (souris_y - BAR_HAUTEUR) // TAILLE_CARREE
+                col_cliquee = souris_x // TAILLE_CARREE
+
+                if pion_selectionne:
+                    ancienne_ligne, ancienne_col = pion_selectionne
+                    if (ligne_cliquee, col_cliquee) == pion_selectionne:
+                        pion_selectionne = None  # Deselect the piece if clicked again
+                    elif changer_position(plateau, ancienne_ligne, ancienne_col, ligne_cliquee, col_cliquee,
+                                          tour_courant):
+                        tour_courant = "N" if tour_courant == "B" else "B"
+                        pion_selectionne = None  # Deselect after move
+                    else:
+                        pion_selectionne = None  # Invalid move, deselect
+                elif plateau[ligne_cliquee][col_cliquee] == tour_courant:
+                    pion_selectionne = (ligne_cliquee, col_cliquee)
 
 pygame.quit()
